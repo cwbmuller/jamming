@@ -1,3 +1,5 @@
+import Cookies from 'universal-cookie';
+
 let accessToken = undefined;
 
 const clientId = '0c3cafaff2e74411a233cbb1abee3d1a';
@@ -6,7 +8,7 @@ const spotifyUrl = `https://accounts.spotify.com/authorize?response_type=token&s
 
 
 const Spotify = {
-    getAccessToken(){
+    getAccessToken(term){
         if(accessToken){
             return accessToken;
         }
@@ -18,11 +20,14 @@ const Spotify = {
             window.setTimeout(() => accessToken = '', expiresIn * 1000);
             window.history.pushState('Access Token', null, '/');
         } else {
+            const cookies = new Cookies();
+            cookies.set('searchTerm', term, { path: '/' });
+            console.log(cookies.get('searchTerm')); // Pacman
             window.location = spotifyUrl;
         }
     },
     search(term) {
-        const accessToken = this.getAccessToken();
+        const accessToken = this.getAccessToken(term);
         const headers = { Authorization: `Bearer ${accessToken}` };
         const searchUrl = `https://api.spotify.com/v1/search?type=track&q=${term.replace(' ', '%20')}`;
         return fetch(searchUrl, {
